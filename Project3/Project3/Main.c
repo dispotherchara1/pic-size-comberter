@@ -217,6 +217,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 						"警告",
 						MB_OK|MB_ICONWARNING
 					);
+					/* 警告後保存ダイアログが出ないようにする */
+					return 0;
 				}
 				
 				/* 現在のファイル名をデフォルトの保存名に設定 */
