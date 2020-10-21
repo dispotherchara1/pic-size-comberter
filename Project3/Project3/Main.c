@@ -292,8 +292,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			/* Windowの破壊 */
 		case WM_DESTROY:
 		{
-			DeleteObject(hBitmap);
-			PostQuitMessage(0);
+			DeleteObject(hFont);   /* フォントの削除      */
+			DeleteObject(hBitmap); /* BITMAPの削除        */
+			CleanMemFile();        /* ヒープ領域の解放    */
+			PostQuitMessage(0);    /* メッセージに0を渡す */
+
 			return 0;
 		}
 		break;

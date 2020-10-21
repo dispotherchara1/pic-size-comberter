@@ -2,6 +2,7 @@ Debug/
 v15/
 .vs/
 
-*.log 
+*.log
 *.db
 *.pdb
+*.suo
