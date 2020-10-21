@@ -1,0 +1,7 @@
+Debug/
+v15/
+vs/
+
+*.log 
+*.db
+*.pdb
