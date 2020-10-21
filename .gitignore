@@ -1,6 +1,6 @@
 Debug/
 v15/
-vs/
+.vs/
 
 *.log 
 *.db
