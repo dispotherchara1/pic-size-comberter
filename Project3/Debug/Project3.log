@@ -1,0 +1,45 @@
+﻿  Main.c
+c:\users\user\source\repos\project3\project3\macro.h(13): warning C4133: '関数': 'unsigned short [15]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(14): warning C4133: '関数': 'unsigned short [12]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(25): warning C4133: '関数': 'unsigned short [17]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(26): warning C4133: '関数': 'unsigned short [12]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(46): warning C4133: '関数': 'wchar_t *' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(58): warning C4133: '関数': 'wchar_t [64]' と 'LPSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(58): warning C4133: '関数': 'unsigned short [18]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(59): warning C4133: '関数': 'wchar_t [64]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(59): warning C4133: '関数': 'unsigned short [7]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(76): warning C4047: '関数': 間接参照のレベルが 'DWORD' と 'void *' で異なっています。
+c:\users\user\source\repos\project3\project3\macro.h(76): warning C4024: 'HeapCreate': の型が 1 の仮引数および実引数と異なります。
+c:\users\user\source\repos\project3\project3\macro.h(77): warning C4047: '関数': 間接参照のレベルが 'DWORD' と 'void *' で異なっています。
+c:\users\user\source\repos\project3\project3\macro.h(77): warning C4024: 'HeapAlloc': の型が 2 の仮引数および実引数と異なります。
+c:\users\user\source\repos\project3\project3\macro.h(79): warning C4133: '関数': 'unsigned short [14]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(79): warning C4133: '関数': 'unsigned short [11]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(87): warning C4133: '関数': 'unsigned short [17]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(87): warning C4133: '関数': 'unsigned short [9]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\macro.h(95): warning C4133: '関数': 'unsigned short [17]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(38): warning C4047: '初期化中': 間接参照のレベルが 'int' と 'void *' で異なっています。
+c:\users\user\source\repos\project3\project3\main.c(59): warning C4047: '関数': 間接参照のレベルが 'LPCSTR' と 'int' で異なっています。
+c:\users\user\source\repos\project3\project3\main.c(59): warning C4024: 'LoadBitmapA': の型が 2 の仮引数および実引数と異なります。
+c:\users\user\source\repos\project3\project3\main.c(90): warning C4133: '関数': 'unsigned short [8]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(96): warning C4047: '関数': 間接参照のレベルが 'DWORD' と 'void *' で異なっています。
+c:\users\user\source\repos\project3\project3\main.c(96): warning C4024: 'CreateWindowExA': の型が 1 の仮引数および実引数と異なります。
+c:\users\user\source\repos\project3\project3\main.c(97): warning C4133: '関数': 'unsigned short [5]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(98): warning C4133: '関数': 'unsigned short [1]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(164): warning C4133: '=': 'wchar_t *' と 'LPSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(167): warning C4133: '=': 'wchar_t *' と 'LPSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(179): warning C4133: '関数': 'wchar_t [64]' と 'LPSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(179): warning C4133: '関数': 'unsigned short [13]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(180): warning C4133: '関数': 'wchar_t [64]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(223): warning C4133: '関数': 'LPSTR' と 'const wchar_t *' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(225): warning C4133: '関数': 'LPSTR' と 'const wchar_t *' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(238): warning C4133: '=': 'wchar_t *' と 'LPSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(240): warning C4133: '=': 'wchar_t *' と 'LPSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(242): warning C4133: '=': 'wchar_t *' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(243): warning C4133: '=': 'unsigned short [9]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(255): warning C4133: '関数': 'wchar_t [64]' と 'LPSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(256): warning C4133: '関数': 'wchar_t [64]' と 'LPCSTR' の間で型に互換性がありません。
+c:\users\user\source\repos\project3\project3\main.c(49): warning C4047: '初期化中': 間接参照のレベルが 'int' と 'void *' で異なっています。
+c:\users\user\source\repos\project3\project3\main.c(352): warning C4098: 'IniWindow': 戻り値の型が 'void' で宣言された関数が、値を返しました。
+c:\users\user\source\repos\project3\project3\main.c(368): warning C4098: 'IniWindow': 戻り値の型が 'void' で宣言された関数が、値を返しました。
+c:\users\user\source\repos\project3\project3\main.c(337): warning C4101: 'msg': ローカル変数は 1 度も使われていません。
+  Project3.vcxproj -> C:\Users\user\source\repos\Project3\Debug\Project3.exe
