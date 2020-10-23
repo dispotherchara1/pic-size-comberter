@@ -164,6 +164,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				ofn.lpstrFile       = szFilePath;
 				ofn.lpstrFile[0]    = '\0';
 				ofn.nMaxFile        = MAX_PATH;
+				ofn.nMaxFileTitle   = MAX_PATH;
 				ofn.lpstrFileTitle  = szFileTitle;
 				ofn.lpstrInitialDir = NULL;
 				ofn.lpstrTitle      = "";
@@ -200,16 +201,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 			case 3:
 			{
+				DWORD dwWritten;
 				/* ファイルが選ばれてないと出力できない */
 				if(ofn.lpstrFileTitle == NULL
 					||ofn.lpstrFile   == NULL
 					||ofn.nFileOffset == 0)
 				{
-					/* wcscpy_sで呼ばれるものにNULLが入っていると止まるんで無でスキップさせる*/
-					ofn.lpstrFileTitle = "";
-					ofn.lpstrFile = "";
-					/* 数字が0だと配列外にアクセスされるので一時的にMAX_PATHの導入 */
-					ofn.nFileOffset = MAX_PATH;
 
 					MessageBox(
 						Master_hWnd,
@@ -217,6 +214,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 						"警告",
 						MB_OK|MB_ICONWARNING
 					);
+					return FALSE;
 				}
 				
 				/* 現在のファイル名をデフォルトの保存名に設定 */
@@ -240,7 +238,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
                 ofns.lpstrFileTitle = szFileTitle;
                 ofns.nMaxFileTitle = MAX_PATH;
                 ofns.lpstrInitialDir = szDir;
-                ofns.lpstrTitle = L"名前を付けて保存";
+                ofns.lpstrTitle = "名前を付けて保存";
 				ofns.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
 				
 				ofns.lpstrDefExt = "txt";/* デフォルトの拡張子 */
@@ -263,7 +261,56 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				/* ファイルをクローズ */
 				CloseHandle(hFile);
 
-				SetWindowText(hWnd, strFile);
+				// ファイルを新規作成
+                hFile = CreateFile(szFilePath,                      // 選択したファイル名
+                    GENERIC_READ | GENERIC_WRITE,    // 読み取りでオープン
+                    0,                               // 共有なし
+                    NULL,                            // デフォルトセキュリティ
+                    CREATE_NEW,                      // 新規作成
+                    FILE_ATTRIBUTE_NORMAL,           // ノーマル属性
+                    NULL);                           // 属性テンプレートなし
+
+                if (hFile == INVALID_HANDLE_VALUE) {
+                    ErrCode = GetLastError();
+                    wsprintf(szErrMsg, "ファイルを作成できません: %d", ErrCode);
+                    MessageBox(Master_hWnd,
+						szErrMsg,
+						"CreateFile",
+						MB_OK|MB_ICONWARNING);
+                    return FALSE;
+                }
+
+                // エディットのバッファ取得
+                HANDLE hMem = (HANDLE)SendMessage(hEdit, EM_GETHANDLE, 0, 0);
+                wchar_t* lpEdit = (wchar_t*)LocalLock((HLOCAL)hMem);
+                wchar_t* p = lpEdit;
+                // バッファのサイズ取得
+                DWORD dwCount = 0;
+                while (*p++)
+                    dwCount++;
+                dwCount *= sizeof(wchar_t);
+
+                // 書き込み
+                WriteFile(hFile, lpEdit, dwCount, &dwWritten, NULL);
+                if (dwCount != dwWritten) {
+                    MessageBox(Master_hWnd,
+						"書き込みに失敗しました",
+						"WriteFile",
+						MB_OK|MB_ICONWARNING);
+                    return FALSE;
+                }
+
+                // エディットのバッファをアンロック
+                LocalUnlock((HLOCAL)hMem);
+                   
+                // ファイルをクローズ
+                CloseHandle(hFile);
+
+                // ファイルの再オープン
+                if (!FileOpenRead(szFilePath))
+                    return FALSE;
+                // ファイル名をウィンドウタイトルに表示
+                SendMessage(hWnd, WM_SETTEXT, 0, (LPARAM)szFileTitle);
 			}
 			break;
 
