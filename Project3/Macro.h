@@ -3,6 +3,9 @@
 /* どの柄 何番のボタン */
 #define BUTTOMSTATUS(status,num) { status , num, TBSTATE_ENABLED, TBSTYLE_BUTTON, 0, 0, 0 }
 
+/***********************************************
+**  メモリとファイルハンドルの削除をする関数  **
+***********************************************/
 BOOL CleanMemFile() 
 {
 	/* ヒープの解放、メモリの削除 */
@@ -10,8 +13,10 @@ BOOL CleanMemFile()
 	{
 		if (!HeapDestroy(hMemory)) 
 		{
-			MessageBox(NULL, L"メモリーの解放に失敗しました",
-				L"HeapDestroy", MB_OK);
+			MessageBox(NULL, 
+				L"メモリーの解放に失敗しました",
+				L"HeapDestroy",
+				MB_OK);
 			return FALSE;
 		}
 		hMemory = NULL;
@@ -22,8 +27,10 @@ BOOL CleanMemFile()
 	{
 		if (!CloseHandle(hFile)) 
 		{
-			MessageBox(NULL, L"ファイルのクローズに失敗しました",
-				L"CloseHandle", MB_OK);
+			MessageBox(NULL,
+				L"ファイルのクローズに失敗しました",
+				L"CloseHandle",
+				MB_OK);
 			return FALSE;
 		}
 		hFile = NULL;
@@ -32,7 +39,9 @@ BOOL CleanMemFile()
 }
 
 
-/* ファイルのオープンと読み取り関数 */
+/***************************************
+**  ファイルのオープンと読み取り関数  **
+***************************************/
 BOOL FileOpenRead(wchar_t* szFilePath) 
 {
 	MEMORYSTATUSEX msex = { sizeof(MEMORYSTATUSEX) };
@@ -49,8 +58,7 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 		NULL,                          /* セキュリティデフォルト */
 		OPEN_EXISTING,                 /* 既存のファイルのみ */
 		FILE_ATTRIBUTE_NORMAL,         /* ノーマル属性 */
-		NULL                           /* 属性テンプレなし */
-	);
+		NULL);                         /* 属性テンプレなし */
 
 	if (hFile == INVALID_HANDLE_VALUE) 
 	{
@@ -84,7 +92,10 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 	/* ファイルの読み込み */
 	if(!ReadFile(hFile,lpBuff,(DWORD)liSize.QuadPart,&dwBytesRead,NULL))
 	{
-		MessageBox(NULL, L"ファイルの読み込みに失敗しました", L"ReadFile", MB_OK);
+		MessageBox(NULL,
+			L"ファイルの読み込みに失敗しました",
+			L"ReadFile",
+			MB_OK);
 		CleanMemFile();
 		return FALSE;
 	}
@@ -92,7 +103,10 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 	/* 読み取りのサイズチェック */
 	if((DWORD)liSize.QuadPart != dwBytesRead)
 	{
-		MessageBox(NULL, L"ファイルの読み込みに失敗しました", "ReadFile",MB_OK);
+		MessageBox(NULL,
+			"ファイルの読み込みに失敗しました", 
+			"ReadFile",
+			MB_OK);
 		CleanMemFile();
 		return FALSE;
 	}
