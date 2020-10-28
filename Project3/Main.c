@@ -72,15 +72,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				tbButton,   /* ボタンの参照 */
 				6, 48, 48,  /* ボタンの数、ボタンに描画する画像サイズ */
 				48, 48,     /* ボタンの大きさ */
-				sizeof(TBBUTTON)
-			);
+				sizeof(TBBUTTON));
 
 			/* ツールバー */
 			hStatus = CreateStatusWindow(
 				WS_CHILD | WS_VISIBLE |
 				CCS_BOTTOM | SBARS_SIZEGRIP,
-				TITLE, hWnd, 1
-			);
+				TITLE, hWnd, 1);
 
 			/* フォントの設定 */
 			hFont = CreateFont(
@@ -91,27 +89,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				CLIP_DEFAULT_PRECIS,
 				DEFAULT_QUALITY,
 				DEFAULT_PITCH,
-				L"ＭＳ ゴシック"
-			);
+				L"ＭＳ ゴシック");
 
 			/* クライアントエリア領域のサイズを取得 */
 			GetClientRect(hWnd, &rc);
 
-			/* エディットボックスのサキュバス */
-			hEdit = CreateWindowEx(
-				WS_EX_CLIENTEDGE,     /* 拡張スタイル */
-				L"EDIT",   /* EDITクラス名 */
-				L"",       /* 表示文字列 */
-				/* スタイル*/
-				WS_CHILD | WS_VISIBLE | ES_WANTRETURN | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
-				rc.left,                       /* x */
-				rc.top,                        /* y */
-				rc.right,                      /* 幅   */
-				rc.bottom,                     /* 高さ */
-				Master_hWnd,                          /* 親ウィンドウのハンドル */
-				(HMENU)IDC_EDIT,               /* エディットリソースID   */
-				((LPCREATESTRUCT)lp)->hInstance,   /* インスタンスハンドル*/
-				NULL);                             /* CREATESTRUCT構造体 */
+			///* エディットボックスのサキュバス */
+			//hEdit = CreateWindow(
+			//	WS_EX_CLIENTEDGE,     /* 拡張スタイル */
+			//	L"EDIT",   /* EDITクラス名 */
+			//	L"",       /* 表示文字列 */
+			//	/* スタイル*/
+			//	WS_CHILD | WS_VISIBLE | ES_WANTRETURN | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
+			//	rc.left,                       /* x */
+			//	rc.top,                        /* y */
+			//	rc.right,                      /* 幅   */
+			//	rc.bottom,                     /* 高さ */
+			//	Master_hWnd,                   /* 親ウィンドウのハンドル */
+			//	(HMENU)IDC_EDIT,               /* エディットリソースID   */
+			//	((LPCREATESTRUCT)lp)->hInstance,   /* インスタンスハンドル*/
+			//	NULL);                             /* CREATESTRUCT構造体 */
 
 			/* エディットの最大文字数の変更 */
 			SendMessage(hEdit, EM_SETLIMITTEXT,0xffff, 0);
@@ -214,8 +211,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 						Master_hWnd,
 						"ファイルが選ばれていないため保存できません",
 						"警告",
-						MB_OK|MB_ICONWARNING
-					);
+						MB_OK|MB_ICONWARNING);
 					return FALSE;
 				}
 				
@@ -296,7 +292,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
                 while (*p++)
                     dwCount++;
                 dwCount *= sizeof(wchar_t);
-
+				
                 // 書き込み
                 WriteFile(hFile, lpEdit, dwCount, &dwWritten, NULL);
                 if (dwCount != dwWritten) {
@@ -326,8 +322,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 					NULL,
 					"あ",
 					"デバッグ用",
-					MB_OK
-					);
+					MB_OK);
 				break;
 
 			case 11:
@@ -340,8 +335,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 					"今はダイアログ以外未実装"
 					/*"https://i.imgur.com/OW9U72u.jpg"*/,
 					"Help",
-					MB_OK
-				);
+					MB_OK);
 			}
 			break;
 			}
@@ -370,6 +364,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			hBuffer = CreateCompatibleDC(hdc);
 			SelectObject(hBuffer, hBitmap);
 
+			/* GHOST of TAJIMAの描画 */
 			BitBlt(hdc, -500,-100, 1900, 1100, hBuffer, 0, 0, SRCCOPY);
 
 			DeleteDC(hBuffer);
@@ -394,25 +389,69 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 };
 #pragma endregion 
 
+#pragma region EditerCreater
+void EditerWindow(HINSTANCE hInstance, 
+	HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	TCHAR szEditerpName[] = TEXT("Edit");
+	MSG msg;
+	WNDCLASS Ewinc;
+
+	Ewinc.style       = CS_HREDRAW | CS_VREDRAW;  /**/
+	Ewinc.lpfnWndProc = WndProc;                  /* ウィンドウプロシージャ呼び出し */
+	Ewinc.cbClsExtra  = Ewinc.cbWndExtra = 0;     /**/
+	Ewinc.hInstance   = hInstance;                /**/
+	Ewinc.hIcon   = LoadIcon(NULL, IDI_APPLICATION);      /**/
+	Ewinc.hCursor = LoadCursor(NULL, IDC_ARROW);          /* マウスの種類 */
+	Ewinc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /**/
+	Ewinc.lpszMenuName  = NULL;
+	Ewinc.lpszClassName = WS_EX_CLIENTEDGE;
+
+	/* ウィンドウクラスへの登録 */
+	/* wincのアドレスにMaster_hWndの属性を登録、失敗はNullを返しreturn 0 */
+	if(!RegisterClass(&Ewinc))return -1;
+
+
+	/* エディットボックスのサキュバス */
+	hEdit = CreateWindow(
+		WS_EX_CLIENTEDGE,     /* 拡張スタイル */
+		L"EDIT",   /* EDITクラス名 */
+		L"",       /* 表示文字列 */
+		/* スタイル*/
+		WS_CHILD | WS_VISIBLE | ES_WANTRETURN | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
+		rc.left,                       /* x */
+		rc.top,                        /* y */
+		rc.right,                      /* 幅   */
+		rc.bottom,                     /* 高さ */
+		Master_hWnd,                   /* 親ウィンドウのハンドル */
+		(HMENU)IDC_EDIT,               /* エディットリソースID   */
+		((LPCREATESTRUCT)lParam)->hInstance,   /* インスタンスハンドル*/
+		NULL);                             /* CREATESTRUCT構造体 */
+
+
+	if (hEdit == NULL)return -1;
+}
+#pragma endregion
+
 #pragma region WindowCreater
 void IniWindow(HINSTANCE hInstance)
 {
 	TCHAR szAppName[] = TEXT("TestApp");
 	MSG msg;
 	WNDCLASS winc;
-	
-	winc.style         = CS_HREDRAW | CS_VREDRAW;
-	winc.lpfnWndProc   = WndProc;
-	winc.cbClsExtra    = winc.cbWndExtra = 0;
-	winc.hInstance     = hInstance;
-	winc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-	winc.hCursor       = LoadCursor(NULL, IDC_ARROW);/* マウスの種類 */
-	winc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-	winc.lpszMenuName  = NULL;
-	winc.lpszClassName = szAppName;/* 名前が一致するものを探す */
 
-									   /* ウィンドウクラスへの登録 */
-									   /* wincのアドレスにMaster_hWndの属性を登録、失敗はNullを返しreturn 0 */
+	winc.style = CS_HREDRAW | CS_VREDRAW;  /**/
+	winc.lpfnWndProc = WndProc;                  /* ウィンドウプロシージャ呼び出し */
+	winc.cbClsExtra = winc.cbWndExtra = 0;     /**/
+	winc.hInstance = hInstance;               /**/
+	winc.hIcon = LoadIcon(NULL, IDI_APPLICATION);      /**/
+	winc.hCursor = LoadCursor(NULL, IDC_ARROW);          /* マウスの種類 */
+	winc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /**/
+	winc.lpszMenuName = NULL;
+	winc.lpszClassName = szAppName;
+
+	/* ウィンドウクラスへの登録 */
+	/* wincのアドレスにMaster_hWndの属性を登録、失敗はNullを返しreturn 0 */
 	if (!RegisterClass(&winc))return -1;
 
 	/* ウィンドウ作成 */
@@ -425,23 +464,26 @@ void IniWindow(HINSTANCE hInstance)
 		NULL,       /* windowのハンドル */
 		NULL,       /* mennyuのハンドル */
 		hInstance,  /* windowを生成するモジュールのハンドル */
-		NULL );     /* WM_CREATEでLPARAMに渡したい値        */
-	
+		NULL);     /* WM_CREATEでLPARAMに渡したい値        */
 
 	if (Master_hWnd == NULL)return -1;
-
-};
+}
 #pragma endregion
 
 #pragma region Main
 int WINAPI WinMain(
 	HINSTANCE hinstansce,
+	HWND hWnd,
+    UINT msg,
+    WPARAM wp,
+    LPARAM lp,
 	HINSTANCE hpreInstance,
 	LPSTR lpCmdLine,
 	int nCmdSHow)
 {
 	MSG hMsg;
 	IniWindow(hinstansce);
+	EditerWindow(hinstansce,hWnd,wp,lp);
 	ShowWindow(Master_hWnd, nCmdSHow);
 	UpdateWindow(Master_hWnd);
 
