@@ -12,7 +12,8 @@ HWND    hEdit;          /* Edit用のハンドル     */
 HFONT   hFont;          /* フォント用ハンドル   */
 HANDLE  hFile;          /* ファイル用ハンドル   */
 HANDLE  hMemory;        /* メモリ用ハンドル     */
-OPENFILENAME ofn,ofns;  /* ファイル開くでしょ？ */
+WNDCLASS eClass;        /* エディター用のクラス */
+OPENFILENAME ofn,ofns;  /*  */
 wchar_t*     lpBuff;
 HWND         hToolBar;       /* ツールバー用ハンドル     */
 HWND         hStatus;        /* ステータスバー用ハンドル */
@@ -94,21 +95,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			/* クライアントエリア領域のサイズを取得 */
 			GetClientRect(hWnd, &rc);
 
-			///* エディットボックスのサキュバス */
-			//hEdit = CreateWindow(
-			//	WS_EX_CLIENTEDGE,     /* 拡張スタイル */
-			//	L"EDIT",   /* EDITクラス名 */
-			//	L"",       /* 表示文字列 */
-			//	/* スタイル*/
-			//	WS_CHILD | WS_VISIBLE | ES_WANTRETURN | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
-			//	rc.left,                       /* x */
-			//	rc.top,                        /* y */
-			//	rc.right,                      /* 幅   */
-			//	rc.bottom,                     /* 高さ */
-			//	Master_hWnd,                   /* 親ウィンドウのハンドル */
-			//	(HMENU)IDC_EDIT,               /* エディットリソースID   */
-			//	((LPCREATESTRUCT)lp)->hInstance,   /* インスタンスハンドル*/
-			//	NULL);                             /* CREATESTRUCT構造体 */
+			/* エディットボックスのサキュバス */
+			hEdit = CreateWindow(
+				WS_EX_CLIENTEDGE,     /* 拡張スタイル */
+				L"EDIT",   /* EDITクラス名 */
+				L"",       /* 表示文字列 */
+				/* スタイル*/
+				WS_CHILD | WS_VISIBLE | ES_WANTRETURN | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
+				rc.left,                       /* x */
+				rc.top,                        /* y */
+				rc.right,                      /* 幅   */
+				rc.bottom,                     /* 高さ */
+				Master_hWnd,                   /* 親ウィンドウのハンドル */
+				(HMENU)IDC_EDIT,               /* エディットリソースID   */
+				((LPCREATESTRUCT)lp)->hInstance,   /* インスタンスハンドル*/
+				NULL);                             /* CREATESTRUCT構造体 */
 
 			/* エディットの最大文字数の変更 */
 			SendMessage(hEdit, EM_SETLIMITTEXT,0xffff, 0);
@@ -163,7 +164,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				ofn.nMaxFileTitle   = MAX_PATH;
 				ofn.lpstrFileTitle  = szFileTitle;
 				ofn.lpstrInitialDir = NULL;
-				ofn.lpstrTitle      = "";
+				ofn.lpstrTitle      = "ファイルを開く";
 				/*ofn.nMaxCustFilter = 256;*/
 				ofn.Flags       = OFN_PATHMUSTEXIST|OFN_FILEMUSTEXIST;
 				ofn.lpstrDefExt = "txt";
@@ -272,7 +273,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
                     FILE_ATTRIBUTE_NORMAL,           // ノーマル属性
                     NULL);                           // 属性テンプレートなし
 
-                if (hFile == INVALID_HANDLE_VALUE) {
+				/* 既に存在するファイル名の場合保存できないようにする */
+                /*if (hFile == INVALID_HANDLE_VALUE) {
                     ErrCode = GetLastError();
                     wsprintf(szErrMsg, "ファイルを作成できません: %d", ErrCode);
                     MessageBox(Master_hWnd,
@@ -280,11 +282,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 						"CreateFile",
 						MB_OK|MB_ICONWARNING);
                     return FALSE;
-                }
+                }*/
 
                 // エディットのバッファ取得
                 HANDLE   hMem   = (HANDLE)SendMessage(hEdit, EM_GETHANDLE, 0, 0);
-                wchar_t* lpEdit = ((wchar_t*)LocalLock((HLOCAL)hMem));
+                wchar_t* lpEdit = ((wchar_t*)LocalLock(/*(HLOCAL)*/hMem));
                 wchar_t* p = lpEdit;
 
                 // バッファのサイズ取得
@@ -389,66 +391,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 };
 #pragma endregion 
 
-#pragma region EditerCreater
-void EditerWindow(HINSTANCE hInstance, 
-	HWND hWnd, WPARAM wParam, LPARAM lParam)
-{
-	TCHAR szEditerpName[] = TEXT("Edit");
-	MSG msg;
-	WNDCLASS Ewinc;
-
-	Ewinc.style       = CS_HREDRAW | CS_VREDRAW;  /**/
-	Ewinc.lpfnWndProc = WndProc;                  /* ウィンドウプロシージャ呼び出し */
-	Ewinc.cbClsExtra  = Ewinc.cbWndExtra = 0;     /**/
-	Ewinc.hInstance   = hInstance;                /**/
-	Ewinc.hIcon   = LoadIcon(NULL, IDI_APPLICATION);      /**/
-	Ewinc.hCursor = LoadCursor(NULL, IDC_ARROW);          /* マウスの種類 */
-	Ewinc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /**/
-	Ewinc.lpszMenuName  = NULL;
-	Ewinc.lpszClassName = WS_EX_CLIENTEDGE;
-
-	/* ウィンドウクラスへの登録 */
-	/* wincのアドレスにMaster_hWndの属性を登録、失敗はNullを返しreturn 0 */
-	if(!RegisterClass(&Ewinc))return -1;
-
-
-	/* エディットボックスのサキュバス */
-	hEdit = CreateWindow(
-		WS_EX_CLIENTEDGE,     /* 拡張スタイル */
-		L"EDIT",   /* EDITクラス名 */
-		L"",       /* 表示文字列 */
-		/* スタイル*/
-		WS_CHILD | WS_VISIBLE | ES_WANTRETURN | ES_MULTILINE | WS_VSCROLL | ES_AUTOVSCROLL,
-		rc.left,                       /* x */
-		rc.top,                        /* y */
-		rc.right,                      /* 幅   */
-		rc.bottom,                     /* 高さ */
-		Master_hWnd,                   /* 親ウィンドウのハンドル */
-		(HMENU)IDC_EDIT,               /* エディットリソースID   */
-		((LPCREATESTRUCT)lParam)->hInstance,   /* インスタンスハンドル*/
-		NULL);                             /* CREATESTRUCT構造体 */
-
-
-	if (hEdit == NULL)return -1;
-}
-#pragma endregion
-
 #pragma region WindowCreater
 void IniWindow(HINSTANCE hInstance)
 {
 	TCHAR szAppName[] = TEXT("TestApp");
 	MSG msg;
 	WNDCLASS winc;
-
-	winc.style = CS_HREDRAW | CS_VREDRAW;  /**/
+	
+	winc.style       = CS_HREDRAW | CS_VREDRAW;  /**/
 	winc.lpfnWndProc = WndProc;                  /* ウィンドウプロシージャ呼び出し */
-	winc.cbClsExtra = winc.cbWndExtra = 0;     /**/
-	winc.hInstance = hInstance;               /**/
-	winc.hIcon = LoadIcon(NULL, IDI_APPLICATION);      /**/
+	winc.cbClsExtra  = winc.cbWndExtra = 0;      /**/
+	winc.hInstance   = hInstance;                /**/
+	winc.hIcon   = LoadIcon(NULL, IDI_APPLICATION);      /**/
 	winc.hCursor = LoadCursor(NULL, IDC_ARROW);          /* マウスの種類 */
 	winc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /**/
-	winc.lpszMenuName = NULL;
+	winc.lpszMenuName  = NULL;
 	winc.lpszClassName = szAppName;
+
+	eClass.style       = CS_HREDRAW | CS_VREDRAW;  /**/
+	eClass.lpfnWndProc = WndProc;                  /* ウィンドウプロシージャ呼び出し */
+	eClass.cbClsExtra  = winc.cbWndExtra = 0;      /**/
+	eClass.hInstance   = hInstance;                /**/
+	eClass.hIcon   = LoadIcon(NULL, IDI_APPLICATION);      /**/
+	eClass.hCursor = LoadCursor(NULL, IDC_ARROW);          /* マウスの種類 */
+	eClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /**/
+	eClass.lpszMenuName  = NULL;
+	eClass.lpszClassName = WS_EX_CLIENTEDGE;
 
 	/* ウィンドウクラスへの登録 */
 	/* wincのアドレスにMaster_hWndの属性を登録、失敗はNullを返しreturn 0 */
@@ -473,17 +441,12 @@ void IniWindow(HINSTANCE hInstance)
 #pragma region Main
 int WINAPI WinMain(
 	HINSTANCE hinstansce,
-	HWND hWnd,
-    UINT msg,
-    WPARAM wp,
-    LPARAM lp,
 	HINSTANCE hpreInstance,
 	LPSTR lpCmdLine,
 	int nCmdSHow)
 {
 	MSG hMsg;
 	IniWindow(hinstansce);
-	EditerWindow(hinstansce,hWnd,wp,lp);
 	ShowWindow(Master_hWnd, nCmdSHow);
 	UpdateWindow(Master_hWnd);
 
