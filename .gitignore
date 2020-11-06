@@ -1,8 +1,13 @@
 Debug/
-v15/
 .vs/
+v15/
+v16/
+x64/
 
-*.log
 *.db
 *.pdb
-*.suo
+*.vcxproj
+*.aps
+
+*.log
+*.meta
