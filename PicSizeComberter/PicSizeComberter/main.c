@@ -6,6 +6,7 @@
 #define IDC_EDIT 9999
 #pragma comment(lib, "comctl32.lib")
 #pragma warning(disable:4996)
+
 #pragma region  グローバル変数 
 HWND    Master_hWnd;    /* window用親ハンドル   */
 HWND    Child_hWnd;     /* window用子ハンドル   */
@@ -39,6 +40,7 @@ wchar_t  szDir[MAX_PATH];
 
 /* unsigned int を uint で使えるように */
 typedef unsigned int uint;
+
 
 /***********************************************
 **  メモリとファイルハンドルの削除をする関数  **
@@ -167,6 +169,9 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 }
 
 
+/**************************************
+** ボタンの柄と場所を指定する関数(?) **
+***************************************/
 TCHAR strFile[MAX_PATH], strCustom[256] = TEXT("Brfor files\0*.*\0\0"); TBBUTTON tbButton[] = {
 	/* ヘルプボタン */
 	BUTTOMSTATUS(STD_HELP   ,11),
@@ -185,7 +190,6 @@ BUTTOMSTATUS(STD_UNDO,4)
 /*****************************
 **  ウィンドウプロシージャ  **
 *****************************/
-#pragma region WindowSuppoter
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	/* MessageBoxの取得した数を入れる */
@@ -260,7 +264,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 	break;
 
-	/* CLOSE(×ボタン)を押した時DESTROYはされていないのでタsスクを安全に終了するにはCLOSEを挟む必要がある */
+	/* CLOSE(×ボタン)を押した時DESTROYはされていないのでタスクを安全に終了するにはCLOSEを挟む必要がある */
 	/* 閉じるボタンが押されたら */
 	case WM_CLOSE:
 	{
@@ -284,8 +288,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		{
 			/* ファイルを開くための下準備 */
 			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = hWnd;
-			/* 開ける・セーブできる拡張子 */
+			ofn.hwndOwner   = hWnd;
+			/* 開ける・セーブできる拡張子 */ 
 			ofn.lpstrFilter =
 				TEXT("Text files {*.txt}\0*.txt\0")
 				TEXT("HTML files {*.htm}\0*.html;*.htm\0")
@@ -293,18 +297,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				TEXT("BITMAP files {*.bmp}\0*.bmp\0")
 				TEXT("JPEG files {*.jpeg}\0*jpg;*.jpg;*.jpe;*jfif\0")
 				TEXT("All files {*.*}\0*.*\0\0");
-			/*ofn.lpstrCustomFilter = strCustom;*/
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFile = szFilePath;
-			ofn.lpstrFile[0] = '\0';
-			ofn.nMaxFile = MAX_PATH;
-			ofn.nMaxFileTitle = MAX_PATH;
-			ofn.lpstrFileTitle = szFileTitle;
+			ofn.nFilterIndex    = 1;
+			ofn.lpstrFile       = szFilePath;
+			ofn.lpstrFile[0]    = '\0';
+			ofn.nMaxFile        = MAX_PATH;
+			ofn.nMaxFileTitle   = MAX_PATH;
+			ofn.lpstrFileTitle  = szFileTitle;
 			ofn.lpstrInitialDir = NULL;
-			ofn.lpstrTitle = "ファイルを開く";
+			ofn.lpstrTitle      = "ファイルを開く";
+			ofn.Flags           = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+			ofn.lpstrDefExt     = "txt";
 			/*ofn.nMaxCustFilter = 256;*/
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			ofn.lpstrDefExt = "txt";
+			/*ofn.lpstrCustomFilter = strCustom;*/
 
 			/* [開く]ダイアログ */
 			if (!GetOpenFileName(&ofn))
@@ -410,19 +414,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				FILE_ATTRIBUTE_NORMAL,           // ノーマル属性
 				NULL);                           // 属性テンプレートなし
 
-												 /* 既に存在するファイル名の場合保存できないようにする */
-												 /*if (hFile == INVALID_HANDLE_VALUE) {
-												 ErrCode = GetLastError();
-												 wsprintf(szErrMsg, "ファイルを作成できません: %d", ErrCode);
-												 MessageBox(Master_hWnd,
-												 szErrMsg,
-												 "CreateFile",
-												 MB_OK|MB_ICONWARNING);
-												 return FALSE;
-												 }*/
-
 												 // エディットのバッファ取得
-			HANDLE   hMem = (HANDLE)SendMessage(hEdit, EM_GETHANDLE, wp, lp);
+			HANDLE   hMem   = (HANDLE)SendMessage(hEdit, EM_GETHANDLE, wp, lp);
 			wchar_t* lpEdit = (wchar_t*)LocalLock((HLOCAL)hMem);
 			wchar_t* p = lpEdit;
 
@@ -530,40 +523,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	/* Windowとして基本の動きをリターン */
 	return DefWindowProc(hWnd, msg, wp, lp);
 };
-#pragma endregion 
 
-#pragma region WindowCreater
+
+/*******************************
+**  ウィンドウを作成する関数  **
+********************************/
 void IniWindow(HINSTANCE hInstance)
 {
 	TCHAR szAppName[] = TEXT("TestApp");
-	MSG msg;
+	MSG   msg;
 	WNDCLASS winc;
 
-	winc.style = CS_HREDRAW | CS_VREDRAW;  /**/
-	winc.lpfnWndProc = WndProc;                  /* ウィンドウプロシージャ呼び出し */
-	winc.cbClsExtra = winc.cbWndExtra = 0;      /**/
-	winc.hInstance = hInstance;                /**/
-	winc.hIcon = LoadIcon(NULL, IDI_APPLICATION);      /**/
+	winc.style = CS_HREDRAW | CS_VREDRAW;       /**/
+	winc.lpfnWndProc = WndProc;                 /* ウィンドウプロシージャ呼び出し */
+	winc.cbClsExtra  = winc.cbWndExtra = 0;     /**/
+	winc.hInstance   = hInstance;               /**/
+	winc.hIcon   = LoadIcon(NULL, IDI_APPLICATION);      /**/
 	winc.hCursor = LoadCursor(NULL, IDC_ARROW);          /* マウスの種類 */
 	winc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /**/
-	winc.lpszMenuName = NULL;
+	winc.lpszMenuName  = NULL;
 	winc.lpszClassName = szAppName;
-
-	//eClass.style       = CS_HREDRAW | CS_VREDRAW;  /**/
-	//eClass.lpfnWndProc = WndProc;                  /* ウィンドウプロシージャ呼び出し */
-	//eClass.cbClsExtra  = eClass.cbWndExtra = 0;    /**/
-	//eClass.hInstance   = hInstance;                /**/
-	//eClass.hIcon   = LoadIcon(NULL, IDI_APPLICATION);      /**/
-	//eClass.hCursor = LoadCursor(NULL, IDC_ARROW);          /* マウスの種類 */
-	//eClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);  /**/
-	//eClass.lpszMenuName  = NULL;
-	//eClass.lpszClassName = WS_EX_CLIENTEDGE;
 
 	/* ウィンドウクラスへの登録 */
 	/* wincのアドレスにMaster_hWndの属性を登録、失敗はNullを返しreturn 0 */
 	if (!RegisterClass(&winc))return -1;
-	//if (!RegisterClass(&eClass))return-1;
-
+	
 	/* ウィンドウ作成 */
 	Master_hWnd = CreateWindowA(
 		szAppName,
@@ -578,9 +562,11 @@ void IniWindow(HINSTANCE hInstance)
 
 	if (Master_hWnd == NULL)return -1;
 }
-#pragma endregion
 
-#pragma region Main
+
+/*****************
+**  メイン関数  **  
+******************/
 int WINAPI WinMain(
 	HINSTANCE hinstansce,
 	HINSTANCE hpreInstance,
@@ -602,9 +588,8 @@ int WINAPI WinMain(
 		}
 		else
 		{
-
+			
 		}
 	};
 	return 0;
 };
-#pragma endregion
