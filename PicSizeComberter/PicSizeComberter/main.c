@@ -1,9 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <Windows.h>
 #include <CommCtrl.h>
 #include <commdlg.h>
 #include "resource.h"
+
 #define TITLE TEXT("TestWindow")
 #define IDC_EDIT 9999
+#define MAX_SIZE 0xffff sizeof(wchar_t)
+
 #pragma comment(lib, "comctl32.lib")
 #pragma warning(disable:4996)
 
@@ -16,7 +22,7 @@ HFONT   hFont;          /* フォント用ハンドル   */
 HANDLE  hFile;          /* ファイル用ハンドル   */
 HANDLE  hMemory;        /* メモリ用ハンドル     */
 WNDCLASS eClass;        /* エディター用のクラス */
-OPENFILENAME ofn, ofns;  /*  */
+OPENFILENAME ofn, ofns; /*  */
 wchar_t*     lpBuff;
 HWND         hToolBar;       /* ツールバー用ハンドル     */
 HWND         hStatus;        /* ステータスバー用ハンドル */
@@ -101,6 +107,7 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
+		/* 失敗 */
 		ErrCode = GetLastError();
 		wsprintf(szErrMsg, "ファイルをオープンできません:%d", ErrCode);
 		MessageBox(Master_hWnd,
@@ -112,11 +119,12 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 
 	/* ファイルサイズの取得 ファイルを読み込むわけではないので注意 */
 	GetFileSizeEx(hFile, &liSize);
-
+	
 	/* メモリ情報の取得 */
 	GlobalMemoryStatusEx(&msex);
 	if (msex.ullAvailVirtual<(unsigned)liSize.QuadPart)
 	{
+		/* 失敗 */
 		MessageBox(Master_hWnd,
 			"メモリが足りません",
 			"GlobalMemoryStatusEX",
@@ -129,6 +137,7 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 	hMemory = HeapCreate(NULL, 0, 0);
 	if (!(lpBuff = (wchar_t*)HeapAlloc(hMemory, NULL, (SIZE_T)liSize.QuadPart)))
 	{
+		/* 失敗 */
 		MessageBox(Master_hWnd,
 			"メモリの確保に失敗しました",
 			"HeapCreate",
@@ -140,6 +149,7 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 	/* ファイルの読み込み */
 	if (!ReadFile(hFile, lpBuff, (DWORD)liSize.QuadPart, &dwBytesRead, NULL))
 	{
+		/* 失敗 */
 		MessageBox(Master_hWnd,
 			"ファイルの読み込みに失敗しました",
 			"ReadFile",
@@ -151,6 +161,7 @@ BOOL FileOpenRead(wchar_t* szFilePath)
 	/* 読み取りのサイズチェック */
 	if ((DWORD)liSize.QuadPart != dwBytesRead)
 	{
+		/* 失敗 */
 		MessageBox(NULL,
 			"ファイルの読み込みに失敗しました",
 			"ReadFile",
@@ -176,14 +187,13 @@ TCHAR strFile[MAX_PATH], strCustom[256] = TEXT("Brfor files\0*.*\0\0"); TBBUTTON
 	/* ヘルプボタン */
 	BUTTOMSTATUS(STD_HELP   ,11),
 	/* 表示しないボタンとボタンの間をあける特別なボタン */
-{ NULL , NULL , TBSTATE_ENABLED, TBSTYLE_SEP, 0, 0, 0 },
+    { NULL , NULL , TBSTATE_ENABLED, TBSTYLE_SEP, 0, 0, 0 },
 
-BUTTOMSTATUS(STD_FILEOPEN,1),
-BUTTOMSTATUS(STD_REPLACE ,2),
-BUTTOMSTATUS(STD_FILESAVE,3),
-
-/* Debug用ボタン */
-BUTTOMSTATUS(STD_UNDO,4)
+    BUTTOMSTATUS(STD_FILEOPEN,1),
+    BUTTOMSTATUS(STD_REPLACE ,2),
+    BUTTOMSTATUS(STD_FILESAVE,3),
+    /* Debug用ボタン */
+    BUTTOMSTATUS(STD_UNDO,4)
 };
 
 
@@ -205,7 +215,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			((LPCREATESTRUCT)lp)->hInstance,
 			TAJIMA);
 
+		/*  */
 		InitCommonControls();
+		
+		/* ツールバー(ボタン)の作成 */
 		hToolBar = CreateToolbarEx(
 			hWnd, WS_CHILD | WS_VISIBLE,
 			0, 5,
@@ -263,7 +276,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		return 0;
 	}
 	break;
-
 	/* CLOSE(×ボタン)を押した時DESTROYはされていないのでタスクを安全に終了するにはCLOSEを挟む必要がある */
 	/* 閉じるボタンが押されたら */
 	case WM_CLOSE:
@@ -385,9 +397,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			ofns.lpstrDefExt = "txt";/* デフォルトの拡張子 */
 
 
-									 /* 名前を付けて保存ダイアログボックス */
+			/* 名前を付けて保存ダイアログボックス */
 			if (!GetSaveFileName(&ofns))
 			{
+				/* エラーが出た場合 */
 				ErrCode = CommDlgExtendedError();
 				if (ErrCode)
 				{
@@ -405,7 +418,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 			/* ファイルをクローズ */
 			CloseHandle(hFile);
 
-			// ファイルを新規作成
+			/* ファイルを新規作成 */
 			hFile = CreateFile(szFilePath,       // 選択したファイル名
 				GENERIC_READ | GENERIC_WRITE,    // 読み取りでオープン
 				0,                               // 共有なし
@@ -414,19 +427,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				FILE_ATTRIBUTE_NORMAL,           // ノーマル属性
 				NULL);                           // 属性テンプレートなし
 
+			/* 専門外のナージャ */
 												 // エディットのバッファ取得
 			HANDLE   hMem   = (HANDLE)SendMessage(hEdit, EM_GETHANDLE, wp, lp);
 			wchar_t* lpEdit = (wchar_t*)LocalLock((HLOCAL)hMem);
 			wchar_t* p = lpEdit;
 
-			// バッファのサイズ取得
+			/* バッファのサイズ取得 */
 			DWORD dwCount = 0;
 			while (*p++) {
 				dwCount++;
 				dwCount *= sizeof(wchar_t);
 			}
 
-			// 書き込み
+			/* 書き込み */
 			WriteFile(hFile, lpEdit, dwCount, &dwWritten, NULL);
 			if (dwCount != dwWritten)
 			{
@@ -437,16 +451,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				return FALSE;
 			}
 
-			// エディットのバッファをアンロック
+			/* エディットのバッファをアンロック */
 			LocalUnlock((HLOCAL)hMem);
 
-			// ファイルをクローズ
+			/* ファイルをクローズ */
 			CloseHandle(hFile);
 
-			// ファイルの再オープン
+			/* ファイルの再オープン */
 			if (!FileOpenRead(szFilePath))
 				return FALSE;
-			// ファイル名をウィンドウタイトルに表示
+			
+			/* ファイル名をウィンドウタイトルに表示 */
 			SendMessage(hWnd, WM_SETTEXT, 0, (LPARAM)szFileTitle);
 		}
 		break;
@@ -489,6 +504,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 	/* 何かしらキーが押されたら */
 	case WM_SYSKEYUP:
+		return 0;
 		break;
 
 
@@ -517,6 +533,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		MoveWindow(hEdit,
 			rc.left, rc.top, rc.right,
 			rc.bottom, TRUE);
+		return 0;
 	};
 	break;
 	}
